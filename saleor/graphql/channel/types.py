@@ -11,7 +11,11 @@ from promise import Promise
 
 from ...channel import models
 from ...core.models import ModelWithMetadata
-from ...core.permissions import AuthorizationFilters, ChannelPermissions
+from ...core.permissions import (
+    AuthorizationFilters,
+    ChannelPermissions,
+    OrderPermissions,
+)
 from ..account.enums import CountryCodeEnum
 from ..core import ResolveInfo
 from ..core.descriptions import (
@@ -19,6 +23,7 @@ from ..core.descriptions import (
     ADDED_IN_35,
     ADDED_IN_36,
     ADDED_IN_37,
+    ADDED_IN_39,
     PREVIEW_FEATURE,
 )
 from ..core.fields import PermissionsField
@@ -160,7 +165,15 @@ class StockSettings(ObjectType):
         )
 
 
-class Channel(ModelObjectType[models.Channel]):
+class OrderSettings(ObjectType):
+    automatically_confirm_all_new_orders = graphene.Boolean(required=True)
+    automatically_fulfill_non_shippable_gift_card = graphene.Boolean(required=True)
+
+    class Meta:
+        description = "Order related settings from site settings."
+
+
+class Channel(ModelObjectType):
     id = graphene.GlobalID(required=True)
     slug = graphene.String(
         required=True,
@@ -249,6 +262,15 @@ class Channel(ModelObjectType[models.Channel]):
         permissions=[
             AuthorizationFilters.AUTHENTICATED_APP,
             AuthorizationFilters.AUTHENTICATED_STAFF_USER,
+        ],
+    )
+    order_settings = PermissionsField(
+        OrderSettings,
+        description="Channel order settings." + ADDED_IN_39,
+        required=True,
+        permissions=[
+            ChannelPermissions.MANAGE_CHANNELS,
+            OrderPermissions.MANAGE_ORDERS,
         ],
     )
 
@@ -384,3 +406,14 @@ class Channel(ModelObjectType[models.Channel]):
     @staticmethod
     def resolve_stock_settings(root: models.Channel, _info: ResolveInfo):
         return StockSettings(allocation_strategy=root.allocation_strategy)
+
+    @staticmethod
+    def resolve_order_settings(root: models.Channel, _info):
+        return OrderSettings(
+            automatically_confirm_all_new_orders=(
+                root.automatically_confirm_all_new_orders
+            ),
+            automatically_fulfill_non_shippable_gift_card=(
+                root.automatically_fulfill_non_shippable_gift_card
+            ),
+        )
