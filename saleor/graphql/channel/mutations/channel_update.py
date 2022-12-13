@@ -4,7 +4,7 @@ from django.utils.text import slugify
 
 from ....channel import models
 from ....channel.error_codes import ChannelErrorCode
-from ....core.permissions import ChannelPermissions
+from ....core.permissions import ChannelPermissions, OrderPermissions
 from ....core.tracing import traced_atomic_transaction
 from ....shipping.tasks import (
     drop_invalid_shipping_methods_relations_for_given_channels,
@@ -53,10 +53,16 @@ class ChannelUpdate(ModelMutation):
         )
 
     class Meta:
-        description = "Update a channel."
+        description = (
+            "Update a channel.\n\n"
+            "Requires one of the following permissions: MANAGE_CHANNELS.\n"
+            "Requires one of the following permissions "
+            "when updating only orderSettings field: "
+            "MANAGE_CHANNELS, MANAGE_ORDERS."
+        )
+        auto_permission_message = False
         model = models.Channel
         object_type = Channel
-        permissions = (ChannelPermissions.MANAGE_CHANNELS,)
         error_type_class = ChannelError
         error_type_field = "channel_errors"
 
@@ -93,6 +99,17 @@ class ChannelUpdate(ModelMutation):
             ] = order_settings["automatically_fulfill_non_shippable_gift_card"]
 
         return cleaned_input
+
+    @classmethod
+    def check_permissions(cls, context, permissions=None, **data):
+        permissions = [ChannelPermissions.MANAGE_CHANNELS]
+
+        # when updating only orderSettings allow MENAGE_ORDERS permission
+        input = data["data"]["input"]
+        if "order_settings" in input and len(input) == 1:
+            permissions.append(OrderPermissions.MANAGE_ORDERS)
+
+        return super().check_permissions(context, permissions, **data)
 
     @classmethod
     def _save_m2m(cls, info: ResolveInfo, instance, cleaned_data):
