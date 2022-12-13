@@ -11964,6 +11964,19 @@ type Mutation {
   ): WebhookDryRun
 
   """
+  Trigger a webhook event. 
+  
+  Requires one of the following permissions: MANAGE_APPS.
+  """
+  webhookTrigger(
+    """The ID of an object to serialize."""
+    objectId: ID!
+
+    """The ID of the webhook."""
+    webhookId: ID!
+  ): WebhookTrigger
+
+  """
   Creates new warehouse. 
   
   Requires one of the following permissions: MANAGE_PRODUCTS.
@@ -15944,6 +15957,38 @@ enum WebhookDryRunErrorCode {
   INVALID_ID
   MISSING_PERMISSION
   TYPE_NOT_SUPPORTED
+}
+
+"""
+Trigger a webhook event. 
+
+Requires one of the following permissions: MANAGE_APPS.
+"""
+type WebhookTrigger {
+  delivery: EventDelivery
+  errors: [WebhookTriggerError!]!
+}
+
+type WebhookTriggerError {
+  """
+  Name of a field that caused the error. A value of `null` indicates that the error isn't associated with a particular field.
+  """
+  field: String
+
+  """The error message."""
+  message: String
+
+  """The error code."""
+  code: WebhookTriggerErrorCode!
+}
+
+"""An enumeration."""
+enum WebhookTriggerErrorCode {
+  GRAPHQL_ERROR
+  NOT_FOUND
+  INVALID_ID
+  MISSING_PERMISSION
+  MISSING_QUERY
 }
 
 """
