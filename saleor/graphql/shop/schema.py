@@ -51,7 +51,11 @@ class ShopQueries(graphene.ObjectType):
         return Shop()
 
     def resolve_order_settings(self, _info):
-        channel = channel_models.Channel.objects.order_by("slug").first()
+        channel = (
+            channel_models.Channel.objects.filter(is_active=True)
+            .order_by("slug")
+            .first()
+        )
         return OrderSettings(
             automatically_confirm_all_new_orders=(
                 channel.automatically_confirm_all_new_orders

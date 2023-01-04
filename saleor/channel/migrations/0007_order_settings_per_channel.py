@@ -20,7 +20,7 @@ def set_order_settings(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("channel", "0006__auto_20221208_0900"),
+        ("channel", "0006_order_settings_fields"),
         ("site", "0032_gift_card_settings"),
     ]
 

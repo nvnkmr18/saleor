@@ -14,7 +14,7 @@ def update_order_settings_values_to_match_first_channel(apps, schema_editor):
     SiteSettings = apps.get_model("site", "SiteSettings")
     Channel = apps.get_model("channel", "Channel")
 
-    channel = Channel.objects.order_by("slug").first()
+    channel = Channel.objects.filter(is_active=True).order_by("slug").first()
 
     SiteSettings.objects.update(
         automatically_confirm_all_new_orders=(

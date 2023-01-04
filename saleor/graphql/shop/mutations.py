@@ -420,7 +420,11 @@ class OrderSettingsUpdate(BaseMutation):
 
         if update_fields:
             channel_models.Channel.objects.update(**update_fields)
-        channel = channel_models.Channel.objects.order_by("slug").first()
+        channel = (
+            channel_models.Channel.objects.filter(is_active=True)
+            .order_by("slug")
+            .first()
+        )
         order_settings = OrderSettings(
             automatically_confirm_all_new_orders=(
                 channel.automatically_confirm_all_new_orders
