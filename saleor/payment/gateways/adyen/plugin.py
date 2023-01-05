@@ -376,6 +376,8 @@ class AdyenGatewayPlugin(BasePlugin):
 
     @property
     def order_auto_confirmation(self):
+        if self.channel is None:
+            return False
         return self.channel.automatically_confirm_all_new_orders
 
     def process_payment(

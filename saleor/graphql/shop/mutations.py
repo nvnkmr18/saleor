@@ -7,12 +7,12 @@ from ...core.error_codes import ShopErrorCode
 from ...core.permissions import GiftcardPermissions, OrderPermissions, SitePermissions
 from ...core.utils.url import validate_storefront_url
 from ...site import GiftCardSettingsExpiryType
-from ...site.error_codes import GiftCardSettingsErrorCode
+from ...site.error_codes import GiftCardSettingsErrorCode, OrderSettingsErrorCode
 from ...site.models import DEFAULT_LIMIT_QUANTITY_PER_CHECKOUT
 from ..account.i18n import I18nMixin
 from ..account.types import AddressInput, StaffNotificationRecipient
-from ..core import ResolveInfo
 from ..channel.types import OrderSettings
+from ..core import ResolveInfo
 from ..core.descriptions import (
     ADDED_IN_31,
     DEPRECATED_IN_3X_INPUT,
@@ -425,6 +425,11 @@ class OrderSettingsUpdate(BaseMutation):
             .order_by("slug")
             .first()
         )
+        if channel is None:
+            raise ValidationError(
+                "There is no active channel available",
+                code=OrderSettingsErrorCode.INVALID.value,
+            )
         order_settings = OrderSettings(
             automatically_confirm_all_new_orders=(
                 channel.automatically_confirm_all_new_orders

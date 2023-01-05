@@ -5,7 +5,7 @@ from django.db import migrations, models
 # Separate state and database changes in migration to avoid downtime.
 # For next release will be prepared migration to remove the field from database.
 
-# Database fields in this migration are changed to null to allow adding new rows to table.
+# Database fields in this migration are changed to null to allow adding new rows.
 # To reverse that operation, we will set all values for `SiteSettings` regarding the
 # first channel in alphabetical order.
 

@@ -56,6 +56,8 @@ class ShopQueries(graphene.ObjectType):
             .order_by("slug")
             .first()
         )
+        if channel is None:
+            return None
         return OrderSettings(
             automatically_confirm_all_new_orders=(
                 channel.automatically_confirm_all_new_orders

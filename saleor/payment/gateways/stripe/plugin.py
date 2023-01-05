@@ -138,6 +138,8 @@ class StripeGatewayPlugin(BasePlugin):
 
     @property
     def order_auto_confirmation(self):
+        if not self.channel:
+            return False
         return self.channel.automatically_confirm_all_new_orders
 
     def _get_transaction_details_for_stripe_status(
