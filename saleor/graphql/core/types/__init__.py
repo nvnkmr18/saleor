@@ -60,7 +60,6 @@ from .filter_input import (
     DateFilterInput,
     DateTimeFilterInput,
     FilterInputObjectType,
-    IdFilterInput,
     IntFilterInput,
     StringFilterInput,
 )
@@ -141,5 +140,4 @@ __all__ = [
     "IntFilterInput",
     "DateFilterInput",
     "DateTimeFilterInput",
-    "IdFilterInput",
 ]
