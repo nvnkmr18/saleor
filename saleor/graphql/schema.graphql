@@ -11947,7 +11947,7 @@ type Mutation {
   ): EventDeliveryRetry
 
   """
-  Performs a dry run of a webhook event. Supports a single event (the first if multiple provided in the `query`). Requires permission relevant to processed event.
+  Performs a dry run of a webhook event. Supports a single event (the first, if multiple provided in the `query`). Requires permission relevant to processed event.
   
   Added in Saleor 3.10.
   
@@ -11964,9 +11964,13 @@ type Mutation {
   ): WebhookDryRun
 
   """
-  Trigger a webhook event. 
+  Trigger a webhook event. Supports a single event (the first, if multiple provided in the `webhook.subscription_query`). Requires permission relevant to processed event.
   
-  Requires one of the following permissions: MANAGE_APPS.
+  Added in Saleor 3.10.
+  
+  Note: this API is currently in Feature Preview and can be subject to changes at later point. 
+  
+  Requires one of the following permissions: AUTHENTICATED_STAFF_USER.
   """
   webhookTrigger(
     """The ID of an object to serialize."""
@@ -15922,7 +15926,7 @@ type EventDeliveryRetry {
 }
 
 """
-Performs a dry run of a webhook event. Supports a single event (the first if multiple provided in the `query`). Requires permission relevant to processed event.
+Performs a dry run of a webhook event. Supports a single event (the first, if multiple provided in the `query`). Requires permission relevant to processed event.
 
 Added in Saleor 3.10.
 
@@ -15960,9 +15964,13 @@ enum WebhookDryRunErrorCode {
 }
 
 """
-Trigger a webhook event. 
+Trigger a webhook event. Supports a single event (the first, if multiple provided in the `webhook.subscription_query`). Requires permission relevant to processed event.
 
-Requires one of the following permissions: MANAGE_APPS.
+Added in Saleor 3.10.
+
+Note: this API is currently in Feature Preview and can be subject to changes at later point. 
+
+Requires one of the following permissions: AUTHENTICATED_STAFF_USER.
 """
 type WebhookTrigger {
   delivery: EventDelivery
@@ -15989,6 +15997,8 @@ enum WebhookTriggerErrorCode {
   INVALID_ID
   MISSING_PERMISSION
   MISSING_QUERY
+  TYPE_NOT_SUPPORTED
+  UNABLE_TO_PARSE
 }
 
 """

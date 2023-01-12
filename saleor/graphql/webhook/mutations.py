@@ -346,7 +346,7 @@ class WebhookDryRun(BaseMutation):
     class Meta:
         description = (
             "Performs a dry run of a webhook event. "
-            "Supports a single event (the first if multiple provided in the `query`). "
+            "Supports a single event (the first, if multiple provided in the `query`). "
             "Requires permission relevant to processed event."
             + ADDED_IN_310
             + PREVIEW_FEATURE
@@ -401,7 +401,6 @@ class WebhookDryRun(BaseMutation):
             if event_type
             else None
         ):
-
             codename = permission.value.split(".")[1]
             user_permissions = [
                 perm.codename for perm in info.context.user.effective_permissions.all()
@@ -436,8 +435,14 @@ class WebhookTrigger(BaseMutation):
         )
 
     class Meta:
-        description = "Trigger a webhook event."
-        permissions = (AppPermission.MANAGE_APPS,)
+        description = (
+            "Trigger a webhook event. Supports a single event "
+            "(the first, if multiple provided in the `webhook.subscription_query`). "
+            "Requires permission relevant to processed event."
+            + ADDED_IN_310
+            + PREVIEW_FEATURE
+        )
+        permissions = (AuthorizationFilters.AUTHENTICATED_STAFF_USER,)
         error_type_class = WebhookTriggerError
 
     @classmethod
@@ -458,23 +463,30 @@ class WebhookTrigger(BaseMutation):
         if not event_type:
             raise_validation_error(
                 message="Can't parse an event type from webhook's subscription query.",
-                code=WebhookTriggerErrorCode.GRAPHQL_ERROR,
+                code=WebhookTriggerErrorCode.UNABLE_TO_PARSE,
             )
 
         event = WEBHOOK_TYPES_MAP.get(event_type) if event_type else None
         if not event and event_type:
             event_name = event_type[0].upper() + to_camel_case(event_type)[1:]
             raise_validation_error(
-                message=f"Event type: {event_name} is not defined in graphql schema.",
+                message=f"Event type: {event_name}, which was parsed from webhook's "
+                f"subscription query, is not defined in graphql schema.",
                 code=WebhookTriggerErrorCode.GRAPHQL_ERROR,
             )
 
         model, _ = graphene.Node.from_global_id(object_id)
-        if (
-            model != WebhookEventAsyncType.ROOT_TYPE.get(event_type)
-            if event_type
-            else None
-        ):
+        model_name = event._meta.root_type  # type: ignore[union-attr]
+        enable_dry_run = event._meta.enable_dry_run  # type: ignore[union-attr]
+
+        if not (model_name or enable_dry_run) and event_type:
+            event_name = event_type[0].upper() + to_camel_case(event_type)[1:]
+            raise_validation_error(
+                message=f"Event type: {event_name}, which was parsed from webhook's "
+                f"subscription query, is not supported.",
+                code=WebhookTriggerErrorCode.TYPE_NOT_SUPPORTED,
+            )
+        if model != model_name:
             raise_validation_error(
                 field="objectId",
                 message="ObjectId doesn't match event type.",

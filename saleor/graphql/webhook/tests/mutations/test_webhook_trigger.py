@@ -25,9 +25,7 @@ WEBHOOK_TRIGGER_MUTATION = """
 @mock.patch("saleor.plugins.webhook.tasks.send_webhook_request_async")
 def test_webhook_trigger(
     mocked_send_webhook_request,
-    staff_api_client,
-    permission_manage_apps,
-    permission_manage_orders,
+    superuser_api_client,
     order,
     subscription_order_created_webhook,
 ):
@@ -41,9 +39,7 @@ def test_webhook_trigger(
     variables = {"webhookId": webhook_id, "objectId": order_id}
 
     # when
-    response = staff_api_client.post_graphql(
-        query, variables, permissions=[permission_manage_apps, permission_manage_orders]
-    )
+    response = superuser_api_client.post_graphql(query, variables)
     content = get_graphql_content(response)
 
     # then
